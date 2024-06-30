@@ -42,7 +42,11 @@ func Handle[t, k any](nullable Nullable[t], def k, handler func(t) k) k {
 
 
 
-func (nullable Nullable[t]) FromNullable(defaultValue t) t {
+func (nullable Nullable[t]) FromNullable(defaultValue t, clean bool) t {
+
+	if nullable.empty && !clean {
+		panic("Nullable is empty")
+	}
 
 	idFunction := func (a t) t {
 		return a

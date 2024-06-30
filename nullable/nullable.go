@@ -56,16 +56,12 @@ func (nullable Nullable[t]) FromNullable(defaultValue t) t {
 
 func SliceIndex[t any](slice []t, index int) Nullable[t] {
 
-	if len(slice) == 0 {
-		return Nullable[t]{empty: true}
-	}
-	
-	if len(slice) - 1 < 0 {
+	if index < 0 || index >= len(slice) {
 		return Nullable[t]{empty: true}
 	}
 
 	return Nullable[t]{
-		value: slice[0],
+		value: slice[index],
 		empty: false,
 	}
 

@@ -9,13 +9,24 @@ type Nullable[t any] struct{
 
 
 
-func ToNullable[t any](value *t) Nullable[t] {
-
-	if value == nil {
-		return Nullable[t] {empty: true}
-	}
+func ToNullable[t any](empty bool, value t) Nullable[t] {
 
 	return Nullable[t] {
+		empty: empty,
+		value: value,
+	}
+
+}
+
+
+
+func ToNullablePointer[t any](value *t) Nullable[t] {
+
+	if value == nil {
+		return Nullable[t]{empty: true}
+	}
+
+	return Nullable[t]{
 		empty: false,
 		value: *value,
 	}

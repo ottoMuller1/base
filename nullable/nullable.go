@@ -9,6 +9,12 @@ type Nullable[t any] struct{
 
 
 
+func Null[t any]() Nullable[t] {
+	return Nullable[t]{empty: true}
+}
+
+
+
 func ToNullable[t any](empty bool, value t) Nullable[t] {
 
 	return Nullable[t] {

@@ -35,16 +35,24 @@ var NullPrefixHandler = nullable.Null[func (string) string]()
 // logger type
 type logger struct {
 	color  string
-	prefixHandler func (string) string
+	tagHandler func (string) string
 }
 
 // new logger
-func New(rgb RGB, prefixHandlerNullable nullable.Nullable[func (string) string]) logger {
+func New(rgb RGB, tagHandlerNullable nullable.Nullable[func (string) string]) logger {
 
 	return logger {
 		color: rgbToAnsi(rgb),
-		prefixHandler: prefixHandlerNullable.FromNullable(
-			func(s string) string {return s},
+		tagHandler: tagHandlerNullable.FromNullable(
+			func(s string) string {
+				tag := "LOG:"
+
+				if s != "" {
+					tag = s
+				}
+
+				return tag + " "
+			},
 			true,
 		),
 	}
@@ -56,35 +64,25 @@ func New(rgb RGB, prefixHandlerNullable nullable.Nullable[func (string) string])
 
 // basic loger terms
 var Error = logger {
-	color: "\033[31m",
-	prefixHandler: func(message string) string {return "ERROR: " + message + " "},
+	color: rgbToAnsi(RGB {255, 0, 0}),
+	tagHandler: func(message string) string {return "ERROR: " + message + " "},
 }
 
 var Warning = logger {
-	color: "\033[33m",
-	prefixHandler: func(message string) string {return "WARNING: " + message + " "},
+	color: rgbToAnsi(RGB {255, 255, 0}),
+	tagHandler: func(message string) string {return "WARNING: " + message + " "},
 }
 
 var Info = logger {
-	color: "\033[32m",
-	prefixHandler: func(message string) string {return "INFO: " + message + " "},
-}
-
-var Custom = logger {
-	color: "\033[36m",
-	prefixHandler: func(message string) string {
-		if message != "" {
-			return message + " "
-		}
-		return "LOG: "
-	},
+	color: rgbToAnsi(RGB{0, 255, 0}),
+	tagHandler: func(message string) string {return "INFO: " + message + " "},
 }
 
 
 
 
 // log function
-func (lg logger) Log(message string, prefix string) {
-	logger := log.New(os.Stdout, makeTextColorized(lg.prefixHandler(prefix), lg.color), log.Ldate|log.Ltime)
+func (lg logger) Log(message string, tag string) {
+	logger := log.New(os.Stdout, makeTextColorized(lg.tagHandler(tag), lg.color), log.Ldate|log.Ltime)
 	logger.Printf(makeTextColorized(message, lg.color))
 }

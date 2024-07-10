@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"github.com/ottoMuller1/base/nullable"
 )
 
 // colors
@@ -29,9 +28,6 @@ func rgbToAnsi(rgb RGB) string {
 
 
 
-// log types
-var NullPrefixHandler = nullable.Null[func (string) string]()
-
 // logger type
 type logger struct {
 	color  string
@@ -39,22 +35,19 @@ type logger struct {
 }
 
 // new logger
-func New(rgb RGB, tagHandlerNullable nullable.Nullable[func (string) string]) logger {
+func New(rgb RGB) logger {
 
 	return logger {
 		color: rgbToAnsi(rgb),
-		tagHandler: tagHandlerNullable.FromNullable(
-			func(s string) string {
-				tag := "LOG:"
+		tagHandler: func(s string) string {
+			tag := "LOG:"
 
-				if s != "" {
-					tag = s
-				}
+			if s != "" {
+				tag = s
+			}
 
-				return tag + " "
-			},
-			true,
-		),
+			return tag
+		},
 	}
 
 }
@@ -65,24 +58,24 @@ func New(rgb RGB, tagHandlerNullable nullable.Nullable[func (string) string]) lo
 // basic loger terms
 var Error = logger {
 	color: rgbToAnsi(RGB {255, 0, 0}),
-	tagHandler: func(message string) string {return "ERROR: " + message + " "},
+	tagHandler: func(message string) string {return "ERROR: " + message},
 }
 
 var Warning = logger {
 	color: rgbToAnsi(RGB {255, 255, 0}),
-	tagHandler: func(message string) string {return "WARNING: " + message + " "},
+	tagHandler: func(message string) string {return "WARNING: " + message},
 }
 
 var Info = logger {
 	color: rgbToAnsi(RGB{0, 255, 0}),
-	tagHandler: func(message string) string {return "INFO: " + message + " "},
+	tagHandler: func(message string) string {return "INFO: " + message},
 }
 
 
 
 
 // log function
-func (lg logger) Log(message string, tag string) {
-	logger := log.New(os.Stdout, makeTextColorized(lg.tagHandler(tag), lg.color), log.Ldate|log.Ltime)
+func (lg logger) Log(tag string, message string) {
+	logger := log.New(os.Stdout, makeTextColorized(lg.tagHandler(tag) + " ", lg.color), log.Ldate|log.Ltime)
 	logger.Printf(makeTextColorized(message, lg.color))
 }

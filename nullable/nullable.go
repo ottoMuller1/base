@@ -15,10 +15,10 @@ func Null[t any]() Nullable[t] {
 
 
 // value to nullable
-func ToNullable[t any](empty bool, value t) Nullable[t] {
+func ToNullable[t any](value t) Nullable[t] {
 
 	return Nullable[t] {
-		empty: empty,
+		empty: false,
 		value: value,
 	}
 
@@ -36,6 +36,18 @@ func ToNullablePointer[t any](value *t) Nullable[t] {
 		empty: false,
 		value: *value,
 	}
+
+}
+
+
+// to pointer
+func (nullable Nullable[t]) ToPointer() *t {
+
+	if nullable.empty {
+		return nil
+	}
+
+	return &nullable.value
 
 }
 

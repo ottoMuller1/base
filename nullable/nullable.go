@@ -4,13 +4,13 @@ package nullable
 // nullable type
 type Nullable[t any] struct{
 	value t
-	empty bool
+	filled bool
 }
 
 
 // null term
 func Null[t any]() Nullable[t] {
-	return Nullable[t]{empty: true}
+	return Nullable[t]{filled: false}
 }
 
 
@@ -18,7 +18,7 @@ func Null[t any]() Nullable[t] {
 func ToNullable[t any](value t) Nullable[t] {
 
 	return Nullable[t] {
-		empty: false,
+		filled: true,
 		value: value,
 	}
 
@@ -29,11 +29,11 @@ func ToNullable[t any](value t) Nullable[t] {
 func ToNullablePointer[t any](value *t) Nullable[t] {
 
 	if value == nil {
-		return Nullable[t]{empty: true}
+		return Nullable[t]{filled: false}
 	}
 
 	return Nullable[t]{
-		empty: false,
+		filled: true,
 		value: *value,
 	}
 
@@ -43,7 +43,7 @@ func ToNullablePointer[t any](value *t) Nullable[t] {
 // to pointer
 func (nullable Nullable[t]) ToPointer() *t {
 
-	if nullable.empty {
+	if !nullable.filled {
 		return nil
 	}
 
@@ -54,7 +54,7 @@ func (nullable Nullable[t]) ToPointer() *t {
 
 // check if nullable is empty
 func (nullable Nullable[t]) IsEmpty() bool {
-	return nullable.empty
+	return !nullable.filled
 }
 
 
@@ -73,7 +73,7 @@ func Handle[t, k any](nullable Nullable[t], def k, handler func(t) k) k {
 // get value or default
 func (nullable Nullable[t]) FromNullable(defaultValue t, clean bool) t {
 
-	if nullable.empty && !clean {
+	if !nullable.filled && !clean {
 		panic("Nullable is empty")
 	}
 
@@ -90,12 +90,12 @@ func (nullable Nullable[t]) FromNullable(defaultValue t, clean bool) t {
 func SliceIndex[t any](slice []t, index int) Nullable[t] {
 
 	if index < 0 || index >= len(slice) {
-		return Nullable[t]{empty: true}
+		return Nullable[t]{filled: false}
 	}
 
 	return Nullable[t]{
 		value: slice[index],
-		empty: false,
+		filled: true,
 	}
 
 }

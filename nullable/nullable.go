@@ -70,11 +70,11 @@ func Handle[t, k any](nullable Nullable[t], def k, handler func(t) k) k {
 }
 
 
-// get value or default
-func (nullable Nullable[t]) FromNullable(defaultValue t, clean bool) t {
+// get value or default, provide error if not clean
+func (nullable Nullable[t]) FromNullable(defaultValue t, err error) t {
 
-	if !nullable.filled && !clean {
-		panic("Nullable is empty")
+	if !nullable.filled && err != nil {
+		panic(err)
 	}
 
 	idFunction := func (a t) t {

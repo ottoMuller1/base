@@ -4,7 +4,6 @@ package nullable
 // nullable type
 type Nullable[t any] struct{
 	filled    bool
-	errPassed bool
 	err       error
 	value     t
 }
@@ -46,9 +45,8 @@ func ToNullablePointer[t any](value *t) Nullable[t] {
 // put an error into nullable
 func (nullable Nullable[t]) PassError(err error) Nullable[t] {
 	
-	if !nullable.errPassed {
+	if nullable.err == nil && err != nil {
 		nullable.err = err
-		nullable.errPassed = true
 		return nullable
 	}
 

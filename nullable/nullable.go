@@ -3,8 +3,10 @@ package nullable
 
 // nullable type
 type Nullable[t any] struct{
-	value t
-	filled bool
+	filled    bool
+	errPassed bool
+	err       error
+	value     t
 }
 
 
@@ -40,6 +42,33 @@ func ToNullablePointer[t any](value *t) Nullable[t] {
 }
 
 
+
+// put an error into nullable
+func (nullable Nullable[t]) PassError(err error) Nullable[t] {
+	
+	if !nullable.errPassed {
+		nullable.err = err
+		nullable.errPassed = true
+		return nullable
+	}
+
+	return nullable
+
+}
+
+
+
+
+
+// get an error from nullable
+func (nullable Nullable[t]) GetError() error {
+	return nullable.err
+}
+
+
+
+
+
 // to pointer
 func (nullable Nullable[t]) ToPointer() *t {
 
@@ -61,7 +90,13 @@ func (nullable Nullable[t]) IsEmpty() bool {
 // handle nullable
 func Handle[t, k any](nullable Nullable[t], def k, handler func(t) k) k {
 
-	if nullable.IsEmpty() {
+	isEmpty := nullable.IsEmpty()
+
+	if isEmpty && nullable.err != nil {
+		panic(nullable.err)
+	}
+
+	if isEmpty {
 		return def
 	}
 
@@ -70,12 +105,8 @@ func Handle[t, k any](nullable Nullable[t], def k, handler func(t) k) k {
 }
 
 
-// get value or default, provide error if not clean
-func (nullable Nullable[t]) FromNullable(defaultValue t, err error) t {
-
-	if !nullable.filled && err != nil {
-		panic(err)
-	}
+// get value or default, invokes exception if not pure
+func (nullable Nullable[t]) FromNullable(defaultValue t) t {
 
 	idFunction := func (a t) t {
 		return a

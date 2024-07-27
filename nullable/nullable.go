@@ -3,10 +3,9 @@ package nullable
 
 // nullable type
 type Nullable[t any] struct{
-	filled    bool
-	errPassed bool
-	err       error
-	value     t
+	filled bool
+	Error  error
+	value  t
 }
 
 
@@ -43,32 +42,6 @@ func ToNullablePointer[t any](value *t) Nullable[t] {
 
 
 
-// put an error into nullable
-func (nullable Nullable[t]) PassError(err error) Nullable[t] {
-	
-	if !nullable.errPassed {
-		nullable.err = err
-		nullable.errPassed = true
-		return nullable
-	}
-
-	return nullable
-
-}
-
-
-
-
-
-// get an error from nullable
-func (nullable Nullable[t]) GetError() error {
-	return nullable.err
-}
-
-
-
-
-
 // to pointer
 func (nullable Nullable[t]) ToPointer() *t {
 
@@ -79,6 +52,17 @@ func (nullable Nullable[t]) ToPointer() *t {
 	return &nullable.value
 
 }
+
+
+
+
+// pass an error use instead of .Err if inlinable Err reset is required
+func (nullable Nullable[t]) PassError(err error) Nullable[t] {
+	nullable.Error = err
+	return nullable
+}
+
+
 
 
 // check if nullable is empty
@@ -92,8 +76,8 @@ func Handle[t, k any](nullable Nullable[t], def k, handler func(t) k) k {
 
 	isEmpty := nullable.IsEmpty()
 
-	if isEmpty && nullable.err != nil {
-		panic(nullable.err)
+	if isEmpty && nullable.Error != nil {
+		panic(nullable.Error)
 	}
 
 	if isEmpty {
